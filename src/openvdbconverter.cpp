@@ -5,6 +5,12 @@
 // grids and save the NanoVDB grid to file.
 // Note, main depends on BOTH OpenVDB and NanoVDB.
 int main(int argc, char* argv[]) {
+
+    if (argc == 1) {
+        std::cout << "no input vdb arg supplied" << std::endl;
+    } else if (argc != 3) {
+        std::cout << "incorrect number of args - must supply an input vdb and a export nvdb file name" << std::endl;
+    }
     try {
         openvdb::initialize();
         // Create a VDB file object.
@@ -28,8 +34,7 @@ int main(int argc, char* argv[]) {
         file.close();
         
         openvdb::FloatGrid::Ptr srcGrid = openvdb::gridPtrCast<openvdb::FloatGrid>(baseGrid);
-        // Create an OpenVDB grid (here a level set surface but replace this with your own code)
-        // auto srcGrid = openvdb::tools::createLevelSetSphere<openvdb::FloatGrid>(100.0f, openvdb::Vec3f(0.0f), 1.0f);
+
         // Convert the OpenVDB grid, srcGrid, into a NanoVDB grid handle.
         auto handle = nanovdb::openToNanoVDB(*srcGrid);
         // Define a (raw) pointer to the NanoVDB grid on the host. Note we match the value type of the srcGrid!
@@ -43,7 +48,7 @@ int main(int argc, char* argv[]) {
         // for (int i = 97; i < 104; ++i) {
         //     printf("(%3i,0,0) OpenVDB cpu: % -4.2f, NanoVDB cpu: % -4.2f\n", i, srcAcc.getValue(openvdb::Coord(i, 0, 0)), dstAcc.getValue(nanovdb::Coord(i, 0, 0)));
         // }
-        nanovdb::io::writeGrid("sphere.nvdb", handle); // Write the NanoVDB grid to file and throw if writing fails
+        nanovdb::io::writeGrid(argv[2], handle); // Write the NanoVDB grid to file and throw if writing fails
     }
     catch (const std::exception& e) {
         std::cerr << "An exception occurred: \"" << e.what() << "\"" << std::endl;
